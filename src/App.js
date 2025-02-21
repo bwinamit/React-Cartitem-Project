@@ -1,37 +1,55 @@
 import React from "react";
 import Cart from "./Cart";
 import Navbar from "./Navbar";
+import { db } from "./FirebaseInit";
+import { collection, getDocs } from "firebase/firestore";
+// import * as firestore from "firebase";
+
+// import firebase from "firebase/app";
+// import { firebase } from "./FirebaseInit";
+// import "firebase/firestore";
+
 class App extends React.Component {
   constructor() {
     super();
-    {
-      this.state = {
-        products: [
-          {
-            price: 8,
-            title: "MobilePhone",
-            quantity: 8,
-            img: "https://plus.unsplash.com/premium_photo-1680985551009-05107cd2752c?q=80&w=1932&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-            id: 1,
-          },
-          {
-            price: 100,
-            title: "Laptop",
-            quantity: 1,
-            img: "https://media.istockphoto.com/id/1251629816/photo/the-perfect-setting-to-complete-work.jpg?s=1024x1024&w=is&k=20&c=Cuut4-7KeL8wcCKIIolYt4RHe6ICMZtDSGmPbu5Y5m8=",
-            id: 2,
-          },
-          {
-            price: 50,
-            title: "Book",
-            quantity: 5,
-            img: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-            id: 3,
-          },
-        ],
-      };
+
+    this.state = {
+      products: [],
+    };
+  }
+  // componentDidMount(){
+  //   db
+  //   .firestore()
+  //   .collection('Products')
+  //   .get()
+  //   .then((snapshot)=>{
+  //     console.log(snapshot,"snapshot")
+  //   })
+  // }
+
+  async componentDidMount() {
+    try {
+      const querySnapshot = await getDocs(collection(db, "Products"));
+
+      const products = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+
+        ...doc.data(),
+      }));
+
+      console.log("products", products);
+    } catch (error) {
+      console.error("Error fetching products:", error);
     }
   }
+
+  // componentDidMount() {
+  //   getDocs(collection(db, "products"))
+  //     .then((snapshot) => snapshot.docs) // Extract only the document snapshots
+  //     .then((docs) => console.log(docs)) // Log the extracted documents
+  //     .catch((error) => console.error("Error fetching products: ", error));
+  // }
+
   handleIncreaseQuantity = (product) => {
     // console.log("Increase Quantity ",product.title)
     const { products } = this.state;
@@ -75,14 +93,14 @@ class App extends React.Component {
     });
     return count;
   };
-  getTotalPrice =()=>{
-    const {products}=this.state;
-    let cartTotal=0
-    products.map((product)=>{
-      cartTotal+=product.quantity*product.price
-    })
-    return cartTotal
-  }
+  getTotalPrice = () => {
+    const { products } = this.state;
+    let cartTotal = 0;
+    products.map((product) => {
+      cartTotal += product.quantity * product.price;
+    });
+    return cartTotal;
+  };
   render() {
     const { products } = this.state;
     return (
@@ -94,7 +112,9 @@ class App extends React.Component {
           onDecreaseQuantity={this.handleDecreaseQuantity}
           onDeleteProduct={this.handleDeleteProduct}
         />
-        <div style={{fontSize:20,padding:5}}>Total:{this.getTotalPrice()}</div>
+        <div style={{ fontSize: 20, padding: 5 }}>
+          Total:{this.getTotalPrice()}
+        </div>
       </div>
     );
   }
